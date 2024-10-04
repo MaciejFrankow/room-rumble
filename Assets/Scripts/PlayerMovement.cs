@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 7f;
+    public float sprintSpeedMultiplier = 1.5f;
     public float rotationSpeed = 250f;
     public float gravity = -9.81f;
     public float jumpHeight = 2.5f;
@@ -29,8 +30,12 @@ public class PlayerMovement : MonoBehaviour
         float moveForward = Input.GetAxis("Vertical");
         float moveRight = Input.GetAxis("Horizontal");
 
+        bool isSprinting = Input.GetKey(KeyCode.LeftShift);
+
+        float currentSpeed = isSprinting ? moveSpeed * sprintSpeedMultiplier : moveSpeed;
+
         Vector3 move = (transform.forward * moveForward + transform.right * moveRight).normalized;
-        characterController.Move(move * moveSpeed * Time.deltaTime);
+        characterController.Move(move * currentSpeed * Time.deltaTime);
 
         float rotation = Input.GetAxis("Mouse X") * rotationSpeed * Time.deltaTime;
         transform.Rotate(0, rotation, 0);
@@ -44,4 +49,3 @@ public class PlayerMovement : MonoBehaviour
         characterController.Move(velocity * Time.deltaTime);
     }
 }
-
