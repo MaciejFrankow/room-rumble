@@ -20,9 +20,6 @@ public class Room : MonoBehaviour
 
     public void GenerateRandomRoom()
     {
-        // This method can be used to handle specific room setup logic if needed,
-        // like setting random materials, decorations, or any other features.
-        // Since you're not using size, this can be left empty or removed.
     }
 
     public Collider[] GetColliders()
@@ -30,18 +27,4 @@ public class Room : MonoBehaviour
         return GetComponentsInChildren<Collider>();
     }
 
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        if (connectionPoints != null)
-        {
-            foreach (var point in connectionPoints)
-            {
-                if (point != null)
-                {
-                    Gizmos.DrawSphere(point.position, 0.2f); // Visualize connection points as small spheres
-                }
-            }
-        }
-    }
 }
