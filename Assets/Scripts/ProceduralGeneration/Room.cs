@@ -4,27 +4,24 @@ using UnityEngine;
 
 public class Room : MonoBehaviour
 {
-    public enum RoomType { Square, Rectangle, LShaped };
-    public RoomType roomType;
+    public Door[] Doors;
 
-    public Transform[] connectionPoints;
-    public List<Transform> usedConnectionPoints = new();
-
-    public bool IsConnectionPointUsed(Transform transform) => usedConnectionPoints.Contains(transform);
-
-    public void MarkConnectionPointAsUsed(Transform transform)
+    void Start()
     {
-        if (!usedConnectionPoints.Contains(transform))
-            usedConnectionPoints.Add(transform);
+
     }
 
-    public void GenerateRandomRoom()
+    void Update()
     {
+        
     }
 
-    public Collider[] GetColliders()
+    public void OpenAllPossibleDoors()
     {
-        return GetComponentsInChildren<Collider>();
+        foreach (Door door in Doors) {
+            door.OpenDoor();
+        }
     }
 
+    public Door GetDoorAtPosition(Transform doorTransform) => Doors.FirstOrDefault(e => e.transform.position.x == doorTransform.transform.position.x && e.transform.position.z == doorTransform.transform.position.z);
 }

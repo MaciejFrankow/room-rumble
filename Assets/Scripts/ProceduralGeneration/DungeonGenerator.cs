@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class DungeonGenerator : MonoBehaviour
 {
-    public GameObject[] roomPrefabs; 
+    public GameObject[] roomPrefabs;   
     public int roomCount = 50;
     private const int gridSize = 40;
     private const int maxPlacementAttempts = 1000;
@@ -71,6 +71,26 @@ public class DungeonGenerator : MonoBehaviour
 
             totalPlacementAttempts++;
         }
+
+        foreach (GameObject generatedRoom in generatedRooms)
+        {
+            Room room = generatedRoom.GetComponent<Room>();
+            Transform[] doorsTransforms = GetDoors(generatedRoom);
+
+            foreach (Transform doorTransform in doorsTransforms) {
+                Door door = room.GetDoorAtPosition(doorTransform);
+                if (ConnectsWithAnyOtherDoor(doorTransform))
+                {
+                    door.OpenDoor();
+                    door.SetFrontier(false);
+                }
+                else
+                {
+                    door.CloseDoor();
+                    door.SetFrontier(true);
+                }
+            }
+        }
     }
 
     bool IsNegativeInfinity(Vector2 position)
@@ -90,17 +110,18 @@ public class DungeonGenerator : MonoBehaviour
 
         GameObject newRoom = Instantiate(roomPrefab);
         newRoom.transform.position = new Vector3(gridPosition.x * gridSize, 0, gridPosition.y * gridSize);
-
+        Room room = newRoom.GetComponent<Room>();
+        room.OpenAllPossibleDoors();
         generatedRooms.Add(newRoom);
         occupiedPositions.Add(gridPosition);
 
-        foreach (Transform door in GetDoors(newRoom))
-        {
-            if (!ConnectsWithAnyOtherDoor(door))
-            {
-                unusedDoors.Add(door);
-            }
-        }
+        //foreach (Transform door in GetDoors(newRoom))
+        //{
+        //    if (!ConnectsWithAnyOtherDoor(door))
+        //    {
+        //        unusedDoors.Add(door);
+        //    }
+        //}
 
         return true;
     }
@@ -123,16 +144,15 @@ public class DungeonGenerator : MonoBehaviour
             if (ConnectsWithExistingRoom(roomPrefab, position, rotationAngle))
             {
                 GameObject newRoom = Instantiate(roomPrefab);
-                newRoom.transform.position = position;
-                newRoom.transform.rotation = rotationAngle;
+                newRoom.transform.SetPositionAndRotation(position, rotationAngle);
                 generatedRooms.Add(newRoom);
                 occupiedPositions.Add(gridPosition);
 
-                foreach (Transform door in GetDoors(newRoom))
+                foreach (Transform doorTransform in GetDoors(newRoom))
                 {
-                    if (!ConnectsWithAnyOtherDoor(door))
+                    if (!ConnectsWithAnyOtherDoor(doorTransform))
                     {
-                        unusedDoors.Add(door);
+                        unusedDoors.Add(doorTransform);
                     }
                 }
 
@@ -165,9 +185,7 @@ public class DungeonGenerator : MonoBehaviour
     bool ConnectsWithExistingRoom(GameObject roomPrefab, Vector3 position, Quaternion rotation)
     {
         GameObject tempRoom = Instantiate(roomPrefab);
-        tempRoom.transform.position = position;
-        tempRoom.transform.rotation = rotation;
-
+        tempRoom.transform.SetPositionAndRotation(position, rotation);
         Transform[] newRoomDoors = GetDoors(tempRoom);
         bool connects = false;
 
@@ -211,7 +229,7 @@ public class DungeonGenerator : MonoBehaviour
 
     Transform[] GetDoors(GameObject room)
     {
-        List<Transform> doors = new List<Transform>();
+        List<Transform> doors = new();
         foreach (Transform child in room.GetComponentsInChildren<Transform>())
         {
             if (child.CompareTag("Door"))
