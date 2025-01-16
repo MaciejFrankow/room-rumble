@@ -115,14 +115,6 @@ public class DungeonGenerator : MonoBehaviour
         generatedRooms.Add(newRoom);
         occupiedPositions.Add(gridPosition);
 
-        //foreach (Transform door in GetDoors(newRoom))
-        //{
-        //    if (!ConnectsWithAnyOtherDoor(door))
-        //    {
-        //        unusedDoors.Add(door);
-        //    }
-        //}
-
         return true;
     }
 
