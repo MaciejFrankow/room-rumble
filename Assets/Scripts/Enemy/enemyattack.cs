@@ -11,7 +11,7 @@ public class enemyattack : MonoBehaviour
 
     public LayerMask whatIsGround, whatIsPayer;
 
-    public float health; // olek hp
+    public float health; 
 
     //Patrolling
     public Vector3 walkPoint;
@@ -29,7 +29,7 @@ public class enemyattack : MonoBehaviour
 
     private void Awake()
     {
-        player = GameObject.Find("Player").transform;   //zapytaæ olka o nazwe gracza
+        player = GameObject.Find("CubeTEST").transform;   
         agent = GetComponent<NavMeshAgent>();
     }
 
@@ -62,7 +62,7 @@ public class enemyattack : MonoBehaviour
 
     private void SearchWalkPoint()
     {
-        //Calculate random point in range
+        
         float randomZ = Random.Range(-walkPointRange, walkPointRange);
         float randomX = Random.Range(-walkPointRange, walkPointRange);
 
@@ -87,7 +87,7 @@ public class enemyattack : MonoBehaviour
 
         if (!alreadyAttacked)
         {
-            ///attack code here
+            
             Rigidbody rb = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<Rigidbody>();
             rb.AddForce(transform.forward * 32f, ForceMode.Impulse);
             rb.AddForce(transform.up * 8f, ForceMode.Impulse);
