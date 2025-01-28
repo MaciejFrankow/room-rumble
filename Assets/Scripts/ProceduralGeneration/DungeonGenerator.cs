@@ -12,6 +12,7 @@ public class DungeonGenerator : MonoBehaviour
     private readonly HashSet<Vector2> occupiedPositions = new(); 
     private readonly Queue<Vector2> frontierPositions = new();
     private readonly List<Transform> unusedDoors = new(); 
+    private readonly HashSet<Vector2> queuedPositions = new();
 
     void Start()
     {
@@ -157,17 +158,16 @@ public class DungeonGenerator : MonoBehaviour
 
     void AddAdjacentPositionsToFrontier(Vector2 position)
     {
-        Vector2[] adjacentPositions = new[]
-        {
-            position + Vector2.up,
-            position + Vector2.down,
-            position + Vector2.left,
-            position + Vector2.right
-        };
+        Vector2[] adjacentPositions = {
+        position + Vector2.up,
+        position + Vector2.down,
+        position + Vector2.left,
+        position + Vector2.right
+    };
 
         foreach (Vector2 pos in adjacentPositions)
         {
-            if (pos != Vector2.negativeInfinity && !occupiedPositions.Contains(pos) && !frontierPositions.Contains(pos) && pos != Vector2.zero)
+            if (!occupiedPositions.Contains(pos) && queuedPositions.Add(pos)) // Add only if not already queued
             {
                 frontierPositions.Enqueue(pos);
             }
@@ -176,9 +176,8 @@ public class DungeonGenerator : MonoBehaviour
 
     bool ConnectsWithExistingRoom(GameObject roomPrefab, Vector3 position, Quaternion rotation)
     {
-        GameObject tempRoom = Instantiate(roomPrefab);
-        tempRoom.transform.SetPositionAndRotation(position, rotation);
-        Transform[] newRoomDoors = GetDoors(tempRoom);
+        roomPrefab.transform.SetPositionAndRotation(position, rotation);
+        Transform[] newRoomDoors = GetDoors(roomPrefab);
         bool connects = false;
 
         foreach (GameObject existingRoom in generatedRooms)
@@ -200,7 +199,6 @@ public class DungeonGenerator : MonoBehaviour
             if (connects) break;
         }
 
-        Destroy(tempRoom);
         return connects;
     }
 
