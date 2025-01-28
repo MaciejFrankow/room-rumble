@@ -1,10 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 7f;
+    public PlayerStats playerStats;
+    public PlayerUIManager uiManager;
+    public Animator weaponAnimator; 
+
     public float sprintSpeedMultiplier = 1.5f;
     public float rotationSpeed = 250f;
     public float gravity = -9.81f;
@@ -13,6 +14,7 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController characterController;
     private Vector3 velocity;
     private bool isGrounded;
+    private bool isWalking;
 
     private void Start()
     {
@@ -30,10 +32,20 @@ public class PlayerMovement : MonoBehaviour
         float moveForward = Input.GetAxis("Vertical");
         float moveRight = Input.GetAxis("Horizontal");
 
-        bool isSprinting = Input.GetKey(KeyCode.LeftShift);
+        bool isMoving = (moveForward != 0 || moveRight != 0);
 
-        float currentSpeed = isSprinting ? moveSpeed * sprintSpeedMultiplier : moveSpeed;
+        if (isMoving && !isWalking)
+        {
+            weaponAnimator.SetBool("isWalking", true);
+            isWalking = true;
+        }
+        else if (!isMoving && isWalking)
+        {
+            weaponAnimator.SetBool("isWalking", false);
+            isWalking = false;
+        }
 
+        float currentSpeed = playerStats.movementSpeed;
         Vector3 move = (transform.forward * moveForward + transform.right * moveRight).normalized;
         characterController.Move(move * currentSpeed * Time.deltaTime);
 
