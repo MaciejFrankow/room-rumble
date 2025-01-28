@@ -38,7 +38,7 @@ ModelImporter:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
     resampleCurves: 1
-    optimizeGameObjects: 0
+    optimizeGameObjects: 1
     removeConstantScaleCurves: 0
     motionNodeName: 
     rigImportErrors: 
@@ -54,7 +54,20 @@ ModelImporter:
     animationPositionError: 0.5
     animationScaleError: 0.5
     animationWrapMode: 0
-    extraExposedTransformPaths: []
+    extraExposedTransformPaths:
+    - Gun_Animation_ready
+    - Handle
+    - Handle_Controller
+    - Handle/Centre
+    - Handle/Centre/Barrel
+    - Handle/Centre/Hammer
+    - Handle/Centre/Hammer/Hammer_02
+    - Handle/Centre/Hinge
+    - Handle/Centre/Hinge/Hinge_02
+    - Handle/Centre/Trigger
+    - Handle/Centre/Trigger/Trigger_02
+    - Handle/Centre/Hinge/Hinge_02/Drum
+    - Handle/Centre/Hinge/Hinge_02/Drum/Drum_02
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
