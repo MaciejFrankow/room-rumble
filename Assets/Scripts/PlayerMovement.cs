@@ -1,10 +1,11 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
     public PlayerStats playerStats;
     public PlayerUIManager uiManager;
-    public Animator weaponAnimator; 
+    public Animator weaponAnimator;
 
     public float sprintSpeedMultiplier = 1.5f;
     public float rotationSpeed = 250f;
@@ -15,6 +16,9 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 velocity;
     private bool isGrounded;
     private bool isWalking;
+    private bool isSprinting;
+    private bool isRegeneratingStamina = false;
+    private bool canSprintAgaian = true;
 
     private void Start()
     {
@@ -32,6 +36,29 @@ public class PlayerMovement : MonoBehaviour
         float moveForward = Input.GetAxis("Vertical");
         float moveRight = Input.GetAxis("Horizontal");
 
+        isSprinting = Input.GetKey(KeyCode.LeftShift) && playerStats.currentStamina > 0 && canSprintAgaian;
+
+        float currentSpeed = isSprinting ? playerStats.movementSpeed * sprintSpeedMultiplier : playerStats.movementSpeed;
+
+        if (isSprinting)
+        {
+            weaponAnimator.SetBool("isWalking", true);
+            playerStats.currentStamina -= Time.deltaTime * 20; // Stamina drains
+            if (playerStats.currentStamina < 0)
+            {
+                playerStats.currentStamina = 0;
+                canSprintAgaian = false;
+            }
+            uiManager.UpdateStaminaBar();
+
+            StopCoroutine(StaminaRegen()); // Stop regen if sprinting
+            isRegeneratingStamina = false;
+        }
+        else if (!isRegeneratingStamina && playerStats.currentStamina < playerStats.maxStamina)
+        {
+            StartCoroutine(StaminaRegen());
+        }
+
         bool isMoving = (moveForward != 0 || moveRight != 0);
 
         if (isMoving && !isWalking)
@@ -45,7 +72,7 @@ public class PlayerMovement : MonoBehaviour
             isWalking = false;
         }
 
-        float currentSpeed = playerStats.movementSpeed;
+
         Vector3 move = (transform.forward * moveForward + transform.right * moveRight).normalized;
         characterController.Move(move * currentSpeed * Time.deltaTime);
 
@@ -59,5 +86,22 @@ public class PlayerMovement : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         characterController.Move(velocity * Time.deltaTime);
+    }
+
+    private IEnumerator StaminaRegen()
+    {
+        isRegeneratingStamina = true;
+        yield return new WaitForSeconds(1f);
+
+        while (playerStats.currentStamina < playerStats.maxStamina)
+        {
+            playerStats.currentStamina += Time.deltaTime * 10;
+            if (playerStats.currentStamina > playerStats.maxStamina) playerStats.currentStamina = playerStats.maxStamina;
+            if (playerStats.currentStamina > playerStats.maxStamina * 0.25f) canSprintAgaian = true;
+            uiManager.UpdateStaminaBar();
+            yield return null;
+        }
+
+        isRegeneratingStamina = false;
     }
 }
