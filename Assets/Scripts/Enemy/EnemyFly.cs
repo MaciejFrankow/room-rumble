@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
-public class Poarch : MonoBehaviour
+public class EnemyFly : MonoBehaviour
 {
     private Rigidbody rb;                    // Referencja do komponentu Rigidbody, pozwala na manipulowanie fizyk¹ obiektu
     private Transform player;                // Transform gracza (pozycja, rotacja itp.)
