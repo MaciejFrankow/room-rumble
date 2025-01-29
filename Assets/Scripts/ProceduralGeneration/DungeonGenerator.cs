@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
 
 public class DungeonGenerator : MonoBehaviour
@@ -14,11 +15,18 @@ public class DungeonGenerator : MonoBehaviour
     private readonly List<Transform> unusedDoors = new(); 
     private readonly HashSet<Vector2> queuedPositions = new();
 
+    public NavMeshSurface navMeshSurface;
+
     void Start()
     {
         GenerateDungeon();
+        BakeNavMesh();
     }
 
+    void BakeNavMesh()
+    {
+        navMeshSurface.BuildNavMesh();
+    }
     void GenerateDungeon()
     {
         Vector2 initialPosition = Vector2.zero;
@@ -73,6 +81,7 @@ public class DungeonGenerator : MonoBehaviour
             totalPlacementAttempts++;
         }
 
+        bool isFirstRoom = true;
         foreach (GameObject generatedRoom in generatedRooms)
         {
             Room room = generatedRoom.GetComponent<Room>();
@@ -91,6 +100,12 @@ public class DungeonGenerator : MonoBehaviour
                     door.SetFrontier(true);
                 }
             }
+            if (isFirstRoom)
+            {
+                isFirstRoom = false;
+                continue;
+            }
+            room.GenerateObjects();
         }
     }
 

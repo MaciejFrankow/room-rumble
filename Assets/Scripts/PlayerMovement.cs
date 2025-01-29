@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -18,11 +19,21 @@ public class PlayerMovement : MonoBehaviour
     private bool isWalking;
     private bool isSprinting;
     private bool isRegeneratingStamina = false;
-    private bool canSprintAgaian = true;
+    private bool canSprintAgain = true;
+
+    [Header("Footstep Settings")]
+    public AudioSource footstepAudioSource;
+    public List<AudioClip> footstepSounds;
+    public float footstepInterval = 0.5f;
+    private float footstepTimer;
 
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
+        if (footstepAudioSource == null)
+        {
+            footstepAudioSource = gameObject.AddComponent<AudioSource>();
+        }
     }
 
     private void Update()
@@ -36,22 +47,21 @@ public class PlayerMovement : MonoBehaviour
         float moveForward = Input.GetAxis("Vertical");
         float moveRight = Input.GetAxis("Horizontal");
 
-        isSprinting = Input.GetKey(KeyCode.LeftShift) && playerStats.currentStamina > 0 && canSprintAgaian;
-
+        isSprinting = Input.GetKey(KeyCode.LeftShift) && playerStats.currentStamina > 0 && canSprintAgain;
         float currentSpeed = isSprinting ? playerStats.movementSpeed * sprintSpeedMultiplier : playerStats.movementSpeed;
 
         if (isSprinting)
         {
             weaponAnimator.SetBool("isWalking", true);
-            playerStats.currentStamina -= Time.deltaTime * 20; // Stamina drains
+            playerStats.currentStamina -= Time.deltaTime * 20;
             if (playerStats.currentStamina < 0)
             {
                 playerStats.currentStamina = 0;
-                canSprintAgaian = false;
+                canSprintAgain = false;
             }
             uiManager.UpdateStaminaBar();
 
-            StopCoroutine(StaminaRegen()); // Stop regen if sprinting
+            StopCoroutine(StaminaRegen());
             isRegeneratingStamina = false;
         }
         else if (!isRegeneratingStamina && playerStats.currentStamina < playerStats.maxStamina)
@@ -72,7 +82,6 @@ public class PlayerMovement : MonoBehaviour
             isWalking = false;
         }
 
-
         Vector3 move = (transform.forward * moveForward + transform.right * moveRight).normalized;
         characterController.Move(move * currentSpeed * Time.deltaTime);
 
@@ -86,6 +95,22 @@ public class PlayerMovement : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         characterController.Move(velocity * Time.deltaTime);
+
+        PlayFootstepSounds(isMoving);
+    }
+
+    private void PlayFootstepSounds(bool isMoving)
+    {
+        if (isMoving && isGrounded && footstepSounds.Count > 0)
+        {
+            footstepTimer -= Time.deltaTime;
+            if (footstepTimer <= 0f)
+            {
+                footstepTimer = isSprinting ? footstepInterval / 1.5f : footstepInterval; // Faster footsteps when sprinting
+                footstepAudioSource.clip = footstepSounds[Random.Range(0, footstepSounds.Count)];
+                footstepAudioSource.Play();
+            }
+        }
     }
 
     private IEnumerator StaminaRegen()
@@ -97,7 +122,7 @@ public class PlayerMovement : MonoBehaviour
         {
             playerStats.currentStamina += Time.deltaTime * 10;
             if (playerStats.currentStamina > playerStats.maxStamina) playerStats.currentStamina = playerStats.maxStamina;
-            if (playerStats.currentStamina > playerStats.maxStamina * 0.25f) canSprintAgaian = true;
+            if (playerStats.currentStamina > playerStats.maxStamina * 0.25f) canSprintAgain = true;
             uiManager.UpdateStaminaBar();
             yield return null;
         }

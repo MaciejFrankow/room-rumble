@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentHealth: 100
   maxHealth: 100
+  currentStamina: 92.86106
   maxStamina: 100
-  maxAmmo: 20
+  maxAmmo: 8
   damage: 20
   armor: 0
   fireRate: 1
